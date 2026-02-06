@@ -2,6 +2,7 @@ package org.example.demo.controllers;
 
 import org.example.demo.entities.Student;
 import org.example.demo.security.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,8 +16,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
+    @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
     private JwtUtil jwtUtil;
 
     public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {

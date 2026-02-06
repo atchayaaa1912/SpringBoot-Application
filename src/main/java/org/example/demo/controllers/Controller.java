@@ -15,6 +15,7 @@ import java.util.List;
 public class Controller {
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
     private final StudentRepository studentRepository;
     public Controller(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
