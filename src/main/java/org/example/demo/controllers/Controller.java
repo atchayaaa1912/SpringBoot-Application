@@ -1,55 +1,109 @@
 package org.example.demo.controllers;
 
+import lombok.extern.slf4j.Slf4j;
+import org.example.demo.services.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.example.demo.entities.Student;
 import org.example.demo.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.example.demo.repositories.StudentRepository;
 import java.util.List;
 
+@Slf4j
+@RestController
 
 @RequestMapping("/students")
-@RestController
 public class Controller {
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
+    private StudentService studentService;
+
+
     private final StudentRepository studentRepository;
-    public Controller(StudentRepository studentRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    public Controller(StudentRepository studentRepository,
+                      PasswordEncoder passwordEncoder) {
         this.studentRepository = studentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
 
     @GetMapping
     public List<Student> getAllStudents() {
+        log.info("Fetching all students");
         return studentRepository.findAll();
     }
 
-    @PostMapping("/createstudent")
-    public Student createuser(@RequestBody Student user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return studentRepository.save(user);
+    // CREATE STUDENT
+    @PostMapping
+    public Student createStudent(@RequestBody Student student) {
+
+        log.info("Creating student with email {}", student.getEmail());
+
+        student.setPassword(passwordEncoder.encode(student.getPassword()));
+
+        Student savedStudent = studentService.saveStudent(student);
+
+
+        log.info("Student created successfully with id {}", savedStudent.getId());
+
+        return savedStudent;
     }
 
+    // GET BY ID
     @GetMapping("/{id}")
-    public Student getUserById(@PathVariable Long id){
-        return studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Data Not Found at id:" + id));
+    public Student getStudentById(@PathVariable Long id) {
+
+        log.info("Fetching student with id {}", id);
+
+        return studentRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Student not found with id {}", id);
+                    return new ResourceNotFoundException("User not found with id: " + id);
+                });
     }
 
+    // UPDATE
     @PutMapping("/{id}")
-    public Student updateUser(@PathVariable Long id,@RequestBody Student user){
-        Student studentdata = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Data Not Found at id:" + id));
-        studentdata.setName(user.getName());
-        studentdata.setEmail(user.getEmail());
-        return studentRepository.save(studentdata);
+    public Student updateStudent(@PathVariable long id, @RequestBody Student user) {
 
+        log.info("Updating student with id {}", id);
+
+        Student userdata = studentRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Student not found for update with id {}", id);
+                    return new ResourceNotFoundException("User not found with id: " + id);
+                });
+
+        userdata.setEmail(user.getEmail());
+        userdata.setName(user.getName());
+
+        Student updatedStudent = studentService.updateStudent(id, user);
+
+
+        log.info("Student updated successfully with id {}", id);
+
+        return updatedStudent;
     }
+
+    // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> DeleteUser(@PathVariable Long id){
-        Student studentdata=studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Data Not Found at id:" + id));
-        studentRepository.delete(studentdata);
+    public ResponseEntity<Object> deleteStudent(@PathVariable long id) {
+
+        log.info("Deleting student with id {}", id);
+
+        Student userdata = studentRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Student not found for delete with id {}", id);
+                    return new ResourceNotFoundException("User not found with id: " + id);
+                });
+
+        studentRepository.delete(userdata);
+
+        log.info("Student deleted successfully with id {}", id);
+
         return ResponseEntity.ok().build();
     }
-
 }

@@ -1,5 +1,6 @@
 package org.example.demo.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.demo.entities.Student;
 import org.example.demo.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,23 +14,25 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
     @Autowired
     private AuthenticationManager authenticationManager;
+
     @Autowired
     private JwtUtil jwtUtil;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-    }
-
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Student user) {
+
+        log.info("Login request received for username {}", user.getUsername());
+
         try {
 
+            log.debug("Authenticating user {}", user.getUsername());
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -42,9 +45,16 @@ public class AuthController {
 
             String token = jwtUtil.generateToken(userDetails);
 
+            log.info("Login successful for username {}", user.getUsername());
+
             return ResponseEntity.ok(Map.of("token", token));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error","Invalid Username or Password"));
+
+        } catch (Exception e) {
+
+            log.error("Login failed for username {}", user.getUsername());
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid Username or Password"));
         }
     }
 }
