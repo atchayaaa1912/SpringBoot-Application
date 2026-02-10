@@ -1,12 +1,15 @@
 package org.example.demo.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Table(name="Student")
 public class Student {
     @Id
@@ -17,19 +20,24 @@ public class Student {
     private String username;
     private String password;
     private String role;
-    private String createdBy;
-    private String modifiedBy;
+    private Long createdBy;
+    private Long modifiedBy;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public Student() {}
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
 
-    public Student(String name, String email, String username, String password,String role,String createdBy,String modifiedBy) {
-        this.name = name;
-        this.email = email;
-        this.username=username;
-        this.password=password;
-        this.role=role;
-        this.createdBy=createdBy;
-        this.modifiedBy=modifiedBy;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        modifiedAt = LocalDateTime.now();
     }
+
+    @PreUpdate
+    protected void onUpdate() {
+        modifiedAt = LocalDateTime.now();
+    }
+
 
 }

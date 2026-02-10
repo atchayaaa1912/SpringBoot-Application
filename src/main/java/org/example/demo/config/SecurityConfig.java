@@ -29,18 +29,25 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
-        http.authorizeHttpRequests(authz ->authz
-                        .requestMatchers(HttpMethod.POST,"/students").permitAll()
-                        .requestMatchers("/students/**").authenticated()
-                        .anyRequest().permitAll())
-                //.formLogin(form ->form.permitAll().defaultSuccessUrl("/dashboard"))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        return  http.build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(sess ->
+                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/students").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/students").hasRole("ADMIN")
+                        .requestMatchers("/students/**").authenticated()
+                        .anyRequest().permitAll()
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
+
     @Bean
     public UserDetailsService userDetailService(PasswordEncoder passwordEncoder){
 //        UserDetails user = User.withUsername("bob").password(passwordEncoder.encode("user123"))
@@ -63,7 +70,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(){
         return new ProviderManager(List.of(authenticationProvider()));
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder(){

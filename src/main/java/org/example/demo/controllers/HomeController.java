@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @ResponseBody
 public class HomeController {
-
     @GetMapping
     public String getHomePage(){
-
         log.info("Home page API called");
 
         return "Welcome to Home Page";
