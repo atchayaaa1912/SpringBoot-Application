@@ -10,8 +10,10 @@ import lombok.*;
 public class StudentDTO {
 
     private Long id;
-
-    private String name;
+    @NotBlank(message = "FirstName must not be empty")
+    private String firstName;
+    @NotBlank(message="LastName must not be empty")
+    private String LastName;
 
     @NotBlank(message = "Email must not be empty")
     @Email(message = "Invalid email format")
