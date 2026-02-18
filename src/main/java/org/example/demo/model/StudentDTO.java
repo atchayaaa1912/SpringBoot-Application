@@ -13,7 +13,7 @@ public class StudentDTO {
     @NotBlank(message = "FirstName must not be empty")
     private String firstName;
     @NotBlank(message="LastName must not be empty")
-    private String LastName;
+    private String lastName;
 
     @NotBlank(message = "Email must not be empty")
     @Email(message = "Invalid email format")
@@ -25,9 +25,15 @@ public class StudentDTO {
 
     @NotBlank(message = "Username must not be empty")
     private String username;
+    private Long createdBy;
+    private Long modifiedBy;
 
     @NotBlank(message = "Password must not be empty")
     @Size(min = 8, message = "Password must have at least 8 characters")
+    @Pattern(
+            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!*()_-]).{8,}$",
+            message = "Password must contain at least one digit, one lowercase, one uppercase, and one special character"
+    )
     private String password;
 
     @NotBlank(message = "Role must not be empty")
